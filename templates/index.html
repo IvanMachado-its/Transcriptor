@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Transcripción</title>
+    <style>
+        :root {
+            --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            --background-gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            --surface-color: rgba(28, 28, 30, 0.8);
+            --surface-color-hover: rgba(44, 44, 46, 0.8);
+            --text-primary: rgba(255, 255, 255, 0.92);
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+            --accent-color: #007aff;
+            --accent-color-hover: #0a84ff;
+            --success-color: #32d74b;
+            --warning-color: #ff9f0a;
+            --error-color: #ff453a;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--background-gradient);
+            color: var(--text-primary);
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-weight: 500;
+            font-size: 24px;
+            letter-spacing: -0.022em;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), rgba(0, 122, 255, 0.5));
+            border-radius: 3px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        form {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            align-items: center;
+        }
+        
+        .form-row select {
+            min-width: 130px;
+            max-width: 180px;
+        }
+
+        .custom-file-input {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            flex: 2;
+            min-width: 250px;
+        }
+
+        .custom-file-input input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--surface-color);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            font-size: 14px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .file-input-label:hover {
+            background-color: var(--surface-color-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .file-input-label span.placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .file-input-label span.file-name {
+            max-width: 80%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-primary);
+        }
+
+        .file-input-label::after {
+            content: "Seleccionar";
+            display: inline-block;
+            color: var(--accent-color);
+            font-weight: 500;
+            margin-left: 8px;
+            min-width: 80px;
+            text-align: right;
+            transition: color 0.2s ease;
+        }
+
+        .file-input-label:hover::after {
+            color: var(--accent-color-hover);
+        }
+
+        select {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 14px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgba(255, 255, 255, 0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+            cursor: pointer;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+        }
+
+        select:hover {
+            background-color: var(--surface-color-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        option {
+            background-color: #1a1a1a;
+            color: var(--text-primary);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            min-width: 120px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--accent-color-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #status {
+            margin: 16px 0;
+            font-weight: 400;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .progress-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 32px;
+        }
+
+        progress {
+            width: 100%;
+            height: 4px;
+            appearance: none;
+            border-radius: 2px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        progress::-webkit-progress-bar {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        progress::-webkit-progress-value {
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        progress::-moz-progress-bar {
+            background-color: var(--accent-color);
+        }
+
+        #progressText {
+            position: absolute;
+            right: 0;
+            top: -20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            margin-top: 40px;
+        }
+
+        h3 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 16px;
+            letter-spacing: -0.011em;
+            display: flex;
+            align-items: center;
+        }
+
+        h3::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            margin-right: 8px;
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 12px;
+            box-shadow: 0 2px 6px var(--shadow);
+            overflow-y: auto;
+            max-height: 240px;
+            white-space: pre-wrap;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+            font-weight: 400;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: var(--text-tertiary);
+            margin-right: 10px;
+            font-size: 12px;
+            min-width: 65px;
+        }
+
+        .log-message {
+            flex: 1;
+        }
+
+        .log-message.info {
+            color: var(--text-secondary);
+        }
+
+        .log-message.success {
+            color: var(--success-color);
+        }
+
+        .log-message.warning {
+            color: var(--warning-color);
+        }
+
+        .log-message.error {
+            color: var(--error-color);
+        }
+
+        .language-info {
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+            
+            h1 {
+                font-size: 22px;
+                margin-bottom: 16px;
+            }
+            
+            form {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .custom-file-input, select {
+                width: 100%;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .progress-container {
+                margin-bottom: 24px;
+            }
+            
+            .card {
+                padding: 16px;
+                max-height: 200px;
+            }
+            
+            .section {
+                margin-top: 32px;
+            }
+            
+            .file-input-label {
+                padding: 12px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistema de Transcripción</h1>
+    <p>Suba un archivo de audio para iniciar el proceso de transcripción automática.</p>
+
+    <form id="uploadForm">
+        <div class="form-row">
+            <div class="custom-file-input">
+                <input type="file" id="fileInput" accept=".mp3,.wav,.m4a,.mp4,.mpeg,.mpga,.webm,.ogg" required>
+                <label for="fileInput" class="file-input-label">
+                    <span id="fileNameDisplay" class="placeholder">Ningún archivo seleccionado</span>
+                </label>
+            </div>
+            <select id="languageSelect" name="language">
+                <option value="es">Español</option>
+                <option value="en">Inglés</option>
+            </select>
+            <select id="taskSelect" name="task">
+                <option value="transcribe">Transcribir</option>
+                <option value="translate_to_en">Traducir a inglés</option>
+                <option value="translate_to_es">Traducir a español</option>
+            </select>
+        </div>
+        <button type="submit">Transcribir</button>
+    </form>
+
+    <p id="status"></p>
+    <div class="progress-container">
+        <progress id="progressBar" value="0" max="100"></progress>
+        <span id="progressText">0%</span>
+    </div>
+
+    <div class="section">
+        <h3>Registro de Actividad</h3>
+        <div id="logs" class="card">
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Transcripción <span id="languageIndicator" class="language-info" style="display: none;"></span></h3>
+        <div id="transcript" class="card"></div>
+    </div>
+
+    <script>
+    document.getElementById('fileInput').addEventListener('change', function() {
+        var fileName = this.files[0]?.name;
+        var fileNameDisplay = document.getElementById('fileNameDisplay');
+        if (fileName) {
+            fileNameDisplay.textContent = fileName;
+            fileNameDisplay.classList.remove('placeholder');
+            fileNameDisplay.classList.add('file-name');
+        } else {
+            fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+            fileNameDisplay.classList.add('placeholder');
+            fileNameDisplay.classList.remove('file-name');
+        }
+    });
+
+    // Función para formatear las entradas de registro
+    function formatLogEntry(log) {
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                      now.getMinutes().toString().padStart(2, '0') + ':' + 
+                      now.getSeconds().toString().padStart(2, '0');
+        
+        let type = 'info';
+        if (log.toLowerCase().includes('completado') || log.toLowerCase().includes('éxito')) {
+            type = 'success';
+        } else if (log.toLowerCase().includes('advertencia') || log.toLowerCase().includes('aviso')) {
+            type = 'warning';
+        } else if (log.toLowerCase().includes('error') || log.toLowerCase().includes('fallo')) {
+            type = 'error';
+        }
+        
+        return `<div class="log-entry">
+                  <span class="log-time">${timeStr}</span>
+                  <span class="log-message ${type}">${log}</span>
+                </div>`;
+    }
+
+    // Mapeo de códigos de idioma a nombres completos
+    const languageNames = {
+        'en': 'Inglés',
+        'es': 'Español',
+        'auto': 'Auto',
+        // Añade más idiomas según sea necesario
+    };
+
+    document.getElementById('uploadForm').onsubmit = function(e) {
+        e.preventDefault();
+        var fileInput = document.getElementById('fileInput');
+        var languageSelect = document.getElementById('languageSelect');
+        var taskSelect = document.getElementById('taskSelect');
+        
+        if (fileInput.files.length == 0) {
+            alert("Por favor selecciona un archivo de audio.");
+            return;
+        }
+        
+        var file = fileInput.files[0];
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("language", languageSelect.value);
+        formData.append("task", taskSelect.value);
+        
+        document.getElementById('status').innerText = "Subiendo archivo...";
+        document.getElementById('languageIndicator').style.display = 'none';
+        
+        // Limpiar los logs anteriores
+        document.getElementById('logEntries').innerHTML = '';
+        document.getElementById('transcript').innerText = '';
+        
+        fetch('/upload', { method: 'POST', body: formData })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('status').innerText = "Transcripción en progreso...";
+            var interval = setInterval(() => {
+                fetch('/progress')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('progressBar').value = data.progress;
+                    document.getElementById('progressText').innerText = data.progress + '%';
+                    
+                    // Formatear y mostrar logs estructurados
+                    const logEntries = document.getElementById('logEntries');
+                    logEntries.innerHTML = '';
+                    data.logs.forEach(log => {
+                        logEntries.innerHTML += formatLogEntry(log);
+                    });
+                    
+                    document.getElementById('transcript').innerText = data.transcript;
+                    
+                    // Mostrar el idioma detectado cuando esté disponible
+                    if (data.language) {
+                        const languageIndicator = document.getElementById('languageIndicator');
+                        const langName = languageNames[data.language.toLowerCase()] || data.language.toUpperCase();
+                        languageIndicator.textContent = langName;
+                        languageIndicator.style.display = 'inline-block';
+                    }
+                    
+                    if (data.done) {
+                        clearInterval(interval);
+                        document.getElementById('status').innerText = "Transcripción completada.";
+                    }
+                });
+            }, 1000);
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            document.getElementById('status').innerText = "Error al subir el archivo.";
+            const logEntries = document.getElementById('logEntries');
+            logEntries.innerHTML += formatLogEntry("Error: No se pudo establecer conexión con el servidor. Verifique su conexión a internet.");
+        });
+    };
+    </script>
+</body>
+</html>
