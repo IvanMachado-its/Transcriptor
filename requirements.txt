@@ -1,4 +1,4 @@
-Flask==2.3.2
-whisper
-torch
-gunicorn
++Flask==2.3.2
++openai-whisper>=20240930
++torch
++gunicorn
